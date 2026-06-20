@@ -8,7 +8,8 @@
   /* ============================================
      可以在这里修改基本信息：
      - 姓名/昵称: 搜索 "YuYe" 替换成你想要的名字
-     - 简介文字: 搜索 "我是雨夜" 替换
+     - 中文简介: 搜索 "我是雨夜" 替换
+     - 英文简介: 搜索 "Nice to meet you" 替换
      - 社交链接: 往下滚动找到 "社交链接区域" 注释
   ============================================ */
 
@@ -50,7 +51,7 @@
     cursor: default;
   }
 
-  /* 背景装饰光斑（原有的两个大光斑，缓慢漂浮） */
+  /* 背景装饰光斑 */
   body::before,
   body::after {
     content: "";
@@ -90,7 +91,7 @@
     50% { transform: translate(-50px, -30px); }
   }
 
-  /* ============== 鼠标跟随光晕（纯 CSS transform，GPU加速，性能开销极小） ============== */
+  /* ============== 鼠标跟随光晕 ============== */
   .cursor-glow {
     position: fixed;
     width: 360px;
@@ -107,6 +108,44 @@
 
   .cursor-glow.active {
     opacity: 1;
+  }
+
+  /* ============== 语言切换按钮 ============== */
+  .lang-switch {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 10;
+    display: flex;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid var(--card-border);
+    border-radius: 999px;
+    padding: 4px;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    animation: fadeIn 0.6s ease 0.3s both;
+  }
+
+  .lang-btn {
+    border: none;
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: 12px;
+    font-weight: 600;
+    padding: 6px 14px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: background 0.25s ease, color 0.25s ease;
+    font-family: inherit;
+  }
+
+  .lang-btn.active {
+    background: linear-gradient(90deg, var(--accent-1), var(--accent-2));
+    color: #fff;
+  }
+
+  .lang-btn:not(.active):hover {
+    color: var(--text-primary);
   }
 
   .card {
@@ -129,14 +168,8 @@
   }
 
   @keyframes slideDown {
-    from {
-      opacity: 0;
-      transform: translateY(-24px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
+    from { opacity: 0; transform: translateY(-24px); }
+    to { opacity: 1; transform: translateY(0); }
   }
 
   @keyframes fadeIn {
@@ -183,13 +216,13 @@
     animation: slideDown 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.3s both;
   }
 
-  /* ============== 打字机效果 ============== */
   .bio {
     font-size: 15px;
     line-height: 1.7;
     color: var(--text-secondary);
     margin-bottom: 32px;
-    min-height: 51px; /* 预留两行高度，防止打字过程中页面跳动 */
+    min-height: 51px;
+    transition: opacity 0.2s ease;
   }
 
   .bio .typed-cursor {
@@ -247,7 +280,10 @@
     font-size: 17px;
   }
 
-  /* 点击波纹效果 */
+  .link-text {
+    transition: opacity 0.15s ease;
+  }
+
   .ripple {
     position: absolute;
     border-radius: 50%;
@@ -258,10 +294,7 @@
   }
 
   @keyframes ripple-effect {
-    to {
-      transform: scale(3);
-      opacity: 0;
-    }
+    to { transform: scale(3); opacity: 0; }
   }
 
   .footer-note {
@@ -271,51 +304,61 @@
     animation: slideDown 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.8s both;
   }
 
-  /* 尊重用户系统的"减少动态效果"设置：自动关闭所有动画/特效，保护性能弱设备和晕动症用户 */
   @media (prefers-reduced-motion: reduce) {
-    body::before, body::after, .card, .avatar, h1, .tagline, .bio, .link-btn, .footer-note {
+    body::before, body::after, .card, .avatar, h1, .tagline, .link-btn, .footer-note, .lang-switch {
       animation: none !important;
     }
     .cursor-glow { display: none !important; }
     .card { transform: none !important; transition: none !important; }
   }
 
-  /* 触屏设备没有鼠标，直接隐藏光晕效果，避免无意义的常驻元素 */
   @media (hover: none) {
     .cursor-glow { display: none !important; }
   }
 
   @media (max-width: 480px) {
     .card { padding: 40px 24px 32px; border-radius: 22px; }
+    .lang-switch { top: 14px; right: 14px; }
   }
 </style>
 </head>
 <body>
 
-  <!-- 鼠标跟随光晕，纯视觉装饰，不收集任何数据 -->
+  <!-- 鼠标跟随光晕 -->
   <div class="cursor-glow" id="cursorGlow"></div>
+
+  <!-- 语言切换按钮 -->
+  <div class="lang-switch">
+    <button class="lang-btn" id="btnZh" onclick="setLang('zh')">中文</button>
+    <button class="lang-btn" id="btnEn" onclick="setLang('en')">EN</button>
+  </div>
 
   <div class="card" id="card">
     <!-- 头像：默认显示名字首字母，想换照片见上方注释 -->
     <div class="avatar">Y</div>
 
-    <!-- 在这里修改你的名字 -->
+    <!-- 在这里修改你的名字（一般姓名两种语言都一样，不用翻译） -->
     <h1>YuYe</h1>
     <div class="tagline">@DJX644</div>
 
-    <!-- 在这里修改你的简介（会以打字机效果显示） -->
-    <p class="bio" id="bioText" data-text="我是雨夜，很高兴认识你。"></p>
+    <!-- 简介：中英文分别写在 data-zh 和 data-en 里 -->
+    <p class="bio" id="bioText"
+       data-zh="我是雨夜，很高兴认识你。"
+       data-en="I'm YuYe. Nice to meet you."></p>
 
-    <!-- 在这里修改你的社交链接，href 改成真实网址 -->
+    <!-- 在这里修改你的社交链接，href 改成真实网址；按钮文字也分中英文 -->
     <div class="links">
       <a class="link-btn" href="https://github.com/DJX644" target="_blank">
-        <span class="icon">💻</span> GitHub
+        <span class="icon">💻</span>
+        <span class="link-text" data-zh="GitHub" data-en="GitHub">GitHub</span>
       </a>
       <a class="link-btn" href="mailto:2178048994@qq.com">
-        <span class="icon">📧</span> 邮箱联系
+        <span class="icon">📧</span>
+        <span class="link-text" data-zh="邮箱联系 2178048994@qq.com" data-en="Email: 2178048994@qq.com">邮箱联系 2178048994@qq.com</span>
       </a>
       <a class="link-btn" href="https://space.bilibili.com/3537107928746180" target="_blank">
-        <span class="icon">📺</span> Bilibili
+        <span class="icon">📺</span>
+        <span class="link-text" data-zh="Bilibili" data-en="Bilibili">Bilibili</span>
       </a>
     </div>
 
@@ -323,12 +366,11 @@
   </div>
 
   <script>
-    // 检测是否为触屏设备 / 用户是否要求减少动效，满足任一条件则跳过所有 JS 特效初始化
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const isTouchDevice = window.matchMedia('(hover: none)').matches;
     const enableEffects = !prefersReducedMotion && !isTouchDevice;
 
-    // ============== 1. 鼠标跟随光晕 ==============
+    // ============== 鼠标跟随光晕 ==============
     if (enableEffects) {
       const glow = document.getElementById('cursorGlow');
       let rafId = null;
@@ -348,7 +390,6 @@
         glow.classList.remove('active');
       });
 
-      // 用 requestAnimationFrame 做平滑跟随插值，避免每次 mousemove 都直接重绘（节流，降低性能开销）
       function animateGlow() {
         currentX += (targetX - currentX) * 0.12;
         currentY += (targetY - currentY) * 0.12;
@@ -362,7 +403,7 @@
       }
     }
 
-    // ============== 2. 卡片轻微 3D 倾斜跟随 ==============
+    // ============== 卡片轻微 3D 倾斜跟随 ==============
     if (enableEffects) {
       const card = document.getElementById('card');
 
@@ -372,8 +413,6 @@
         const y = e.clientY - rect.top;
         const centerX = rect.width / 2;
         const centerY = rect.height / 2;
-
-        // 倾斜幅度故意调得很小（最大约2.5度），保持克制，不做成游戏卡片那种夸张效果
         const rotateX = ((y - centerY) / centerY) * -2.5;
         const rotateY = ((x - centerX) / centerX) * 2.5;
 
@@ -385,10 +424,12 @@
       });
     }
 
-    // ============== 3. 打字机效果（页面加载时跑一次，不循环、不持续占用资源）==============
-    function typeWriter() {
+    // ============== 打字机效果 ==============
+    let typingTimeoutId = null;
+
+    function typeWriter(text) {
       const el = document.getElementById('bioText');
-      const text = el.getAttribute('data-text');
+      el.textContent = '';
       let i = 0;
 
       const cursor = document.createElement('span');
@@ -399,24 +440,15 @@
           el.textContent = text.slice(0, i + 1);
           el.appendChild(cursor);
           i++;
-          setTimeout(type, 55);
+          typingTimeoutId = setTimeout(type, 55);
         } else {
-          // 打字完成后，光标再闪烁几秒然后移除，避免永久占用一个 CSS 动画
-          setTimeout(() => cursor.remove(), 2400);
+          typingTimeoutId = setTimeout(() => cursor.remove(), 2400);
         }
       }
       type();
     }
 
-    if (prefersReducedMotion) {
-      // 减少动效模式下，直接显示完整文字，不跑逐字动画
-      document.getElementById('bioText').textContent =
-        document.getElementById('bioText').getAttribute('data-text');
-    } else {
-      typeWriter();
-    }
-
-    // ============== 4. 按钮点击波纹效果 ==============
+    // ============== 按钮点击波纹效果 ==============
     document.querySelectorAll('.link-btn').forEach(btn => {
       btn.addEventListener('click', function (e) {
         const rect = this.getBoundingClientRect();
@@ -429,10 +461,59 @@
         ripple.style.top = (e.clientY - rect.top - size / 2) + 'px';
 
         this.appendChild(ripple);
-        // 动画结束后清理掉这个 DOM 节点，避免按钮里堆积越来越多 ripple 元素
         ripple.addEventListener('animationend', () => ripple.remove());
       });
     });
+
+    // ============== 语言切换核心逻辑 ==============
+    const STORAGE_KEY = 'site-lang'; // localStorage 中保存语言偏好的键名
+
+    function setLang(lang) {
+      // 清掉正在进行的打字动画，避免切换语言时新旧文字打字过程冲突
+      if (typingTimeoutId) clearTimeout(typingTimeoutId);
+
+      // 更新所有带 data-zh / data-en 的元素文字
+      document.querySelectorAll('[data-' + lang + ']').forEach(el => {
+        if (el.id === 'bioText') return; // 简介单独用打字机效果处理，这里跳过
+        el.textContent = el.getAttribute('data-' + lang);
+      });
+
+      // 简介用打字机效果重新播放（如果用户要求减少动效，则直接显示完整文字）
+      const bioEl = document.getElementById('bioText');
+      const bioText = bioEl.getAttribute('data-' + lang);
+      if (prefersReducedMotion) {
+        bioEl.textContent = bioText;
+      } else {
+        typeWriter(bioText);
+      }
+
+      // 更新切换按钮的高亮状态
+      document.getElementById('btnZh').classList.toggle('active', lang === 'zh');
+      document.getElementById('btnEn').classList.toggle('active', lang === 'en');
+
+      // 更新 html 标签的 lang 属性（有利于屏幕阅读器和浏览器正确识别页面语言）
+      document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en';
+
+      // 保存到 localStorage，下次访问自动恢复
+      try {
+        localStorage.setItem(STORAGE_KEY, lang);
+      } catch (e) {
+        // 部分隐私模式下 localStorage 可能不可用，静默忽略，不影响当前这次的语言切换
+      }
+    }
+
+    // ============== 初始化：读取上次保存的语言，没有则默认中文 ==============
+    let initialLang = 'zh';
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved === 'zh' || saved === 'en') {
+        initialLang = saved;
+      }
+    } catch (e) {
+      // localStorage 不可用时，保持默认中文
+    }
+
+    setLang(initialLang);
   </script>
 
 </body>
