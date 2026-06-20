@@ -243,14 +243,29 @@
     top: 16px;
     right: 16px;
     z-index: 999;
-    background: rgba(15, 12, 41, 0.8);
+    background: rgba(15, 12, 41, 0.85);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 12px;
-    padding: 12px 16px;
+    padding: 12px 14px;
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
-    font-size: 12px;
-    min-width: 200px;
+    font-size: 11px;
+    min-width: 220px;
+    max-height: 85vh;
+    overflow-y: auto;
+  }
+
+  .system-monitor::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .system-monitor::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .system-monitor::-webkit-scrollbar-thumb {
+    background: rgba(255, 110, 196, 0.3);
+    border-radius: 2px;
   }
 
   .monitor-title {
@@ -298,15 +313,41 @@
 
   <!-- 系统监控面板 -->
   <div class="system-monitor">
-    <div class="monitor-title">📊 系统监控</div>
+    <div class="monitor-title">📊 访客信息</div>
+    
     <div class="monitor-item">
-      <span class="monitor-label">内存 (JS):</span>
+      <span class="monitor-label">系统:</span>
+      <span class="monitor-value" id="osInfo">检测中...</span>
+    </div>
+    <div class="monitor-item">
+      <span class="monitor-label">浏览器:</span>
+      <span class="monitor-value" id="browserInfo">检测中...</span>
+    </div>
+    <div class="monitor-item">
+      <span class="monitor-label">CPU核心:</span>
+      <span class="monitor-value" id="cpuCores">-- 核</span>
+    </div>
+    <div class="monitor-item">
+      <span class="monitor-label">设备内存:</span>
+      <span class="monitor-value" id="deviceMemory">-- GB</span>
+    </div>
+    <div class="monitor-item">
+      <span class="monitor-label">屏幕分辨率:</span>
+      <span class="monitor-value" id="screenRes">-- × --</span>
+    </div>
+    <div class="monitor-item">
+      <span class="monitor-label">浏览器内存:</span>
       <span class="monitor-value" id="memoryUsage">-- MB</span>
     </div>
     <div class="monitor-item">
-      <span class="monitor-label">时间运行:</span>
+      <span class="monitor-label">网络类型:</span>
+      <span class="monitor-value" id="networkType">-- Mbps</span>
+    </div>
+    <div class="monitor-item">
+      <span class="monitor-label">运行时间:</span>
       <span class="monitor-value" id="runtimeDays">-- 天</span>
     </div>
+    
     <div class="runtime-info" id="runtimeDetail">正在初始化...</div>
   </div>
 
@@ -347,12 +388,76 @@
     // 网站创建日期
     const siteCreationDate = new Date('2026-06-20');
     
+    // 检测操作系统
+    function detectOS() {
+      const userAgent = navigator.userAgent.toLowerCase();
+      if (userAgent.indexOf('win') > -1) return 'Windows';
+      if (userAgent.indexOf('mac') > -1) return 'macOS';
+      if (userAgent.indexOf('linux') > -1) return 'Linux';
+      if (userAgent.indexOf('x11') > -1) return 'Unix';
+      if (userAgent.indexOf('android') > -1) return 'Android';
+      if (userAgent.indexOf('iphone') > -1 || userAgent.indexOf('ipad') > -1) return 'iOS';
+      return '未知';
+    }
+    
+    // 检测浏览器
+    function detectBrowser() {
+      const userAgent = navigator.userAgent;
+      let match = userAgent.match(/(Opera|OPR|Chrome|Safari|Firefox|Edge)\/?\s*(\d+)/i);
+      if (match) {
+        return match[1] + ' ' + match[2];
+      }
+      return '未知';
+    }
+    
+    // 获取CPU核心数
+    function getCPUCores() {
+      return navigator.hardwareConcurrency || '未知';
+    }
+    
+    // 获取设备内存
+    function getDeviceMemory() {
+      if (navigator.deviceMemory) {
+        return navigator.deviceMemory + ' GB';
+      }
+      return '未知';
+    }
+    
+    // 获取屏幕分辨率
+    function getScreenResolution() {
+      return window.screen.width + ' × ' + window.screen.height;
+    }
+    
+    // 获取网络信息
+    function getNetworkInfo() {
+      if (navigator.connection) {
+        const effectiveType = navigator.connection.effectiveType || '未知';
+        const downlink = navigator.connection.downlink || '未知';
+        if (downlink !== '未知') {
+          return downlink + ' Mbps';
+        }
+        return effectiveType;
+      }
+      return '未知';
+    }
+    
+    // 初始化设备信息
+    function initDeviceInfo() {
+      document.getElementById('osInfo').textContent = detectOS();
+      document.getElementById('browserInfo').textContent = detectBrowser();
+      document.getElementById('cpuCores').textContent = getCPUCores() + ' 核';
+      document.getElementById('deviceMemory').textContent = getDeviceMemory();
+      document.getElementById('screenRes').textContent = getScreenResolution();
+      document.getElementById('networkType').textContent = getNetworkInfo();
+    }
+    
     // 更新系统监控信息
     function updateSystemMonitor() {
-      // 更新内存使用情况
+      // 更新浏览器内存使用情况
       if (performance.memory) {
         const usedMemory = Math.round(performance.memory.usedJSHeapSize / 1048576);
-        document.getElementById('memoryUsage').textContent = usedMemory + ' MB';
+        const totalMemory = Math.round(performance.memory.jsHeapSizeLimit / 1048576);
+        document.getElementById('memoryUsage').textContent = usedMemory + ' / ' + totalMemory + ' MB';
       }
       
       // 计算运行时间
@@ -361,13 +466,22 @@
       const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
       const hours = Math.floor((timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
       const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((timeDiff % (1000 * 60)) / 1000);
       
       document.getElementById('runtimeDays').textContent = days + ' 天';
       document.getElementById('runtimeDetail').textContent = 
-        `网站已运行 ${days}天 ${hours}小时 ${minutes}分钟`;
+        `网站运行 ${days}天 ${hours}h ${minutes}m ${seconds}s`;
     }
     
-    // 初始化并定期更新
+    // 监听网络变化
+    if (navigator.connection) {
+      navigator.connection.addEventListener('change', () => {
+        document.getElementById('networkType').textContent = getNetworkInfo();
+      });
+    }
+    
+    // 初始化
+    initDeviceInfo();
     updateSystemMonitor();
     setInterval(updateSystemMonitor, 1000);
   </script>
