@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DJX644 · 个人主页</title>
+<style>
+  /* ============================================
+     可以在这里修改基本信息：
+     - 姓名/昵称: 搜索 "YuYe" 替换成你想要的名字
+     - 简介文字: 搜索 "你好我是雨夜" 替换
+     - 社交链接: 往下滚动找到 "社交链接区域" 注释
+  ============================================ */
+
+  :root {
+    --bg-1: #0f0c29;
+    --bg-2: #302b63;
+    --bg-3: #24243e;
+    --accent-1: #ff6ec4;
+    --accent-2: #7873f5;
+    --accent-3: #4adede;
+    --text-primary: #f5f5f7;
+    --text-secondary: #b8b5d1;
+    --card-bg: rgba(255, 255, 255, 0.06);
+    --card-border: rgba(255, 255, 255, 0.12);
+  }
+
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    font-family: 'Helvetica Neue', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    background: linear-gradient(135deg, var(--bg-1), var(--bg-2) 50%, var(--bg-3));
+    background-attachment: fixed;
+    color: var(--text-primary);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  /* 背景装饰光斑 */
+  body::before,
+  body::after {
+    content: "";
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(120px);
+    opacity: 0.35;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  body::before {
+    width: 420px;
+    height: 420px;
+    background: var(--accent-1);
+    top: -100px;
+    left: -100px;
+    animation: float1 14s ease-in-out infinite;
+  }
+
+  body::after {
+    width: 380px;
+    height: 380px;
+    background: var(--accent-3);
+    bottom: -100px;
+    right: -100px;
+    animation: float2 16s ease-in-out infinite;
+  }
+
+  @keyframes float1 {
+    0%, 100% { transform: translate(0, 0); }
+    50% { transform: translate(60px, 40px); }
+  }
+
+  @keyframes float2 {
+    0%, 100% { transform: translate(0, 0); }
+    50% { transform: translate(-50px, -30px); }
+  }
+
+  .card {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 420px;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 28px;
+    padding: 48px 36px 40px;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+    text-align: center;
+    animation: rise 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(24px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .avatar {
+    width: 104px;
+    height: 104px;
+    border-radius: 50%;
+    margin: 0 auto 24px;
+    background: linear-gradient(135deg, var(--accent-1), var(--accent-2), var(--accent-3));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 40px;
+    font-weight: 700;
+    color: #fff;
+    box-shadow: 0 8px 30px rgba(120, 115, 245, 0.45);
+  }
+
+  /* 头像备用：如果想换成真实照片，把上面 .avatar div 换成
+     <img src="你的照片.jpg" class="avatar" style="object-fit:cover;"> */
+
+  h1 {
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    background: linear-gradient(90deg, var(--accent-1), var(--accent-2), var(--accent-3));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 6px;
+  }
+
+  .tagline {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-bottom: 20px;
+    letter-spacing: 0.3px;
+  }
+
+  .bio {
+    font-size: 15px;
+    line-height: 1.7;
+    color: var(--text-secondary);
+    margin-bottom: 32px;
+  }
+
+  /* ============== 社交链接区域 ============== */
+  .links {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .link-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 14px 20px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--card-border);
+    color: var(--text-primary);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: transform 0.25s ease, background 0.25s ease, border-color 0.25s ease;
+  }
+
+  .link-btn:hover {
+    transform: translateY(-2px);
+    background: rgba(255, 255, 255, 0.1);
+    border-color: var(--accent-2);
+  }
+
+  .link-btn .icon {
+    font-size: 17px;
+  }
+
+  .footer-note {
+    margin-top: 32px;
+    font-size: 12px;
+    color: rgba(184, 181, 209, 0.5);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    body::before, body::after, .card { animation: none; }
+  }
+
+  @media (max-width: 480px) {
+    .card { padding: 40px 24px 32px; border-radius: 22px; }
+  }
+</style>
+</head>
+<body>
+
+  <div class="card">
+    <!-- 头像：默认显示名字首字母，想换照片见上方注释 -->
+    <div class="avatar">Y</div>
+
+    <!-- 在这里修改你的名字 -->
+    <h1>YuYe</h1>
+    <div class="tagline">@DJX644</div>
+
+    <!-- 在这里修改你的简介 -->
+    <p class="bio">
+      我是雨夜，
+      很高兴认识你。
+    </p>
+
+    <!-- 在这里修改你的社交链接，href 改成真实网址 -->
+    <div class="links">
+      <a class="link-btn" href="https://github.com/DJX644" target="_blank">
+        <span class="icon">💻</span> GitHub
+      </a>
+      <a class="link-btn" MY emal="#" target="2178048994@qq.com">
+        <span class="icon">📧</span> 邮箱联系2178048994@qq.com
+      </a>
+      <a class="link-btn" https://www.bilibili.com/="#" target="https://space.bilibili.com/3537107928746180?spm_id_from=333.1007.0.0">
+        <span class="icon">🐦</span> 社交媒体
+      </a>
+      <a class="link-btn" href="#" target="_blank">
+        <span class="icon">✨</span> 其他链接
+      </a>
+    </div>
+
+    <div class="footer-note">© 2026 YuYe</div>
+  </div>
+
+</body>
+</html>
