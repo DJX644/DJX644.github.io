@@ -320,9 +320,68 @@
     .card { padding: 40px 24px 32px; border-radius: 22px; }
     .lang-switch { top: 14px; right: 14px; }
   }
+
+  /* ============== 开屏加载动画 ============== */
+  .preloader {
+    position: fixed;
+    inset: 0;
+    z-index: 999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--bg-1), var(--bg-2) 50%, var(--bg-3));
+    transition: opacity 0.5s ease, visibility 0.5s ease;
+  }
+
+  .preloader.hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  .preloader-mark {
+    width: 84px;
+    height: 84px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent-1), var(--accent-2), var(--accent-3));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    font-weight: 700;
+    color: #fff;
+    box-shadow: 0 8px 30px rgba(120, 115, 245, 0.45);
+    animation: preloaderPulse 1.1s ease-in-out infinite;
+  }
+
+  @keyframes preloaderPulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(0.85); opacity: 0.7; }
+  }
+
+  /* 页面主内容在预加载阶段先隐藏，避免和开屏动画的入场动画叠加播放 */
+  body.is-loading .card,
+  body.is-loading .lang-switch {
+    animation-play-state: paused !important;
+    opacity: 0;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .preloader { transition: none; }
+    .preloader-mark { animation: none; }
+    body.is-loading .card,
+    body.is-loading .lang-switch {
+      opacity: 1;
+    }
+  }
 </style>
 </head>
-<body>
+<body class="is-loading">
+
+  <!-- 开屏加载动画，1秒左右后自动淡出 -->
+  <div class="preloader" id="preloader">
+    <div class="preloader-mark">Y</div>
+  </div>
 
   <!-- 鼠标跟随光晕 -->
   <div class="cursor-glow" id="cursorGlow"></div>
@@ -514,6 +573,21 @@
     }
 
     setLang(initialLang);
+
+    // ============== 开屏动画控制 ==============
+    // 固定展示约 900ms 后淡出，给访客一个简短的过场，又不会等太久
+    const PRELOADER_MIN_TIME = prefersReducedMotion ? 0 : 900;
+
+    function hidePreloader() {
+      const preloader = document.getElementById('preloader');
+      preloader.classList.add('hidden');
+      document.body.classList.remove('is-loading');
+
+      // 动画淡出完成后彻底移除节点，避免常驻一个不可见的 fixed 全屏元素
+      preloader.addEventListener('transitionend', () => preloader.remove(), { once: true });
+    }
+
+    setTimeout(hidePreloader, PRELOADER_MIN_TIME);
   </script>
 
 </body>
